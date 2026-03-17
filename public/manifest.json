@@ -1,0 +1,22 @@
+{
+  "name": "ZOKU — Find Your Tribe in Every City",
+  "short_name": "ZOKU",
+  "description": "Find verified hostels, gyms, sports clubs, events, and your tribe in any city.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080818",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
