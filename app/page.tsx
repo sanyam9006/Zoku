@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import Image from 'next/image';
 import ScrollButton from '@/components/ScrollButton';
 import { HOSTELS, GYMS, EVENTS, SPORTS_CLUBS, CITIES } from '@/lib/data';
 import ListingCard from '@/components/ListingCard';
@@ -236,7 +237,7 @@ export default function HomePage() {
             {CITIES.map((city) => (
               <Link key={city.slug} href={`/city/${city.slug}`} className="group block">
                 <div className="relative rounded-2xl overflow-hidden aspect-square cursor-pointer">
-                  <img src={city.image} alt={city.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  <Image src={city.image} alt={city.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent group-hover:from-purple-DEFAULT/60 transition-all" />
                   <div className="absolute bottom-0 left-0 right-0 p-3 text-center">
                     <p className="font-bold text-white text-sm">{city.name}</p>

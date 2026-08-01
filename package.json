@@ -6,12 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "npx tsx supabase/seed.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@supabase/auth-helpers-nextjs": "^0.15.0",
-    "@supabase/auth-helpers-react": "^0.15.0",
+    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.99.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.37.0",

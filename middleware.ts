@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -18,7 +18,7 @@ export async function middleware(req: NextRequest) {
           return req.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => req.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
           res = NextResponse.next({
             request: {
               headers: req.headers,
@@ -32,11 +32,20 @@ export async function middleware(req: NextRequest) {
     }
   )
 
+  // Refresh the auth token — this is critical for server components to read
+  // a valid session. Without this, getSession() in server components may
+  // return stale or null sessions.
   await supabase.auth.getUser()
 
   return res
 }
 
 export const config = {
-  matcher: ['/profile/:path*', '/dashboard/:path*', '/onboarding/:path*']
+  matcher: [
+    '/profile/:path*',
+    '/dashboard/:path*',
+    '/onboarding/:path*',
+    '/admin/:path*',
+    '/inbox/:path*',
+  ],
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Star, MapPin, Clock, Dumbbell } from 'lucide-react';
 import type { Gym } from '@/lib/types';
@@ -65,30 +66,31 @@ export default function GymCard({ gym }: GymCardProps) {
     }
   };
 
-  const icon = TYPE_ICONS[gym.type] || '💪';
-  const colorClass = TYPE_COLORS[gym.type] || TYPE_COLORS.gym;
+  const icon = TYPE_ICONS[gym.gym_type] || '💪';
+  const colorClass = TYPE_COLORS[gym.gym_type] || TYPE_COLORS.gym;
 
   return (
     <Link href={`/gyms/${gym.id}`} className="block group">
       <div className="glow-card overflow-hidden cursor-pointer">
         {/* Image */}
         <div className="relative h-44 overflow-hidden">
-          <img
+          <Image
             src={gym.photos[0]}
             alt={gym.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
           <div className="absolute top-3 left-3">
             <span className={`neon-pill border ${colorClass}`}>
-              {icon} {gym.type.charAt(0).toUpperCase() + gym.type.slice(1)}
+              {icon} {gym.gym_type.charAt(0).toUpperCase() + gym.gym_type.slice(1)}
             </span>
           </div>
 
           <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-right">
             <p className="text-xs text-muted">from</p>
-            <p className="text-sm font-bold text-white">₹{gym.price.toLocaleString()}<span className="text-muted text-xs font-normal">/mo</span></p>
+            <p className="text-sm font-bold text-white">₹{gym.price_min.toLocaleString()}<span className="text-muted text-xs font-normal">/mo</span></p>
           </div>
         </div>
 

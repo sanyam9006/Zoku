@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import UserCard from '@/components/UserCard';
@@ -167,7 +168,7 @@ export default function CommunityPage() {
               {FEED_POSTS.map((post) => (
                 <div key={post.id} className="glow-card p-6 group">
                   <div className="flex items-center gap-4 mb-4">
-                    <img src={post.avatar} alt={post.user} className="w-12 h-12 rounded-2xl object-cover ring-2 ring-zoku-border group-hover:ring-green/50 transition-all" />
+                    <div className="relative w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-zoku-border group-hover:ring-green/50 transition-all shrink-0"><Image src={post.avatar} alt={post.user} fill className="object-cover" /></div>
                     <div>
                       <p className="font-black text-zoku-text text-base">{post.user}</p>
                       <p className="text-xs text-muted font-semibold uppercase">{post.city} · {post.time}</p>

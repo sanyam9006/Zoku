@@ -4,6 +4,7 @@ import { GYMS } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Star, MapPin, Clock, Shield, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function generateStaticParams() {
   return GYMS.map((g) => ({ id: g.id }));
@@ -27,8 +28,8 @@ export default function GymDetailPage({ params }: { params: { id: string } }) {
           </Link>
 
           {/* Photo */}
-          <div className="rounded-2xl overflow-hidden h-72 mb-8">
-            <img src={gym.photos[0]} alt={gym.name} className="w-full h-full object-cover" />
+          <div className="relative rounded-2xl overflow-hidden h-72 mb-8">
+            <Image src={gym.photos[0]} alt={gym.name} fill className="object-cover" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -36,7 +37,7 @@ export default function GymDetailPage({ params }: { params: { id: string } }) {
               <div>
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span className="neon-pill bg-purple-DEFAULT/10 text-purple-DEFAULT border border-purple-DEFAULT/20">
-                    {TYPE_ICONS[gym.type]} {gym.type.charAt(0).toUpperCase() + gym.type.slice(1)}
+                    {TYPE_ICONS[gym.gym_type]} {gym.gym_type.charAt(0).toUpperCase() + gym.gym_type.slice(1)}
                   </span>
                 </div>
                 <h1 className="text-3xl font-black text-zoku-text mb-2">{gym.name}</h1>
@@ -78,7 +79,7 @@ export default function GymDetailPage({ params }: { params: { id: string } }) {
             <div className="lg:col-span-1">
               <div className="glow-card p-6 sticky top-24">
                 <p className="text-muted text-sm mb-1">Membership</p>
-                <p className="text-3xl font-black text-zoku-text mb-1">₹{gym.price.toLocaleString()}</p>
+                <p className="text-3xl font-black text-zoku-text mb-1">₹{gym.price_min.toLocaleString()}</p>
                 <p className="text-xs text-muted mb-6">per month</p>
                 <button className="btn-primary w-full !py-3.5 !rounded-xl mb-3">📞 Enquire Now</button>
                 <button className="btn-secondary w-full !py-3.5 !rounded-xl">🔖 Save</button>

@@ -224,7 +224,7 @@ function NavbarContent() {
           { href: '/', icon: '🏠', label: 'Home' },
           { href: '/explore', icon: '🔭', label: 'Explore' },
           { href: '/events', icon: '🎉', label: 'Events' },
-          { href: '/community', icon: '👥', label: 'Tribe' },
+          { href: '/inbox', icon: '💬', label: 'Inbox' },
           { href: '/profile', icon: '👤', label: 'Profile' },
         ].map((item) => (
           <Link

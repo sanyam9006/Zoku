@@ -4,6 +4,7 @@ import { EVENTS } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Calendar, MapPin, Users, Ticket, ArrowLeft, Clock } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function generateStaticParams() {
   return EVENTS.map((e) => ({ id: e.id }));
@@ -19,7 +20,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   if (!event) return notFound();
 
   const emoji = CATEGORY_EMOJIS[event.category] || '🎉';
-  const dateObj = new Date(event.date);
+  const dateObj = new Date(event.event_date);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -31,8 +32,8 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
           </Link>
 
           {/* Hero image */}
-          <div className="rounded-2xl overflow-hidden h-72 mb-8 relative">
-            <img src={event.photos[0]} alt={event.title} className="w-full h-full object-cover" />
+          <div className="relative rounded-2xl overflow-hidden h-72 mb-8">
+            <Image src={event.photo || '/placeholder.jpg'} alt={event.title} fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-4 left-4">
               <span className="neon-pill bg-black/60 backdrop-blur-sm text-white border border-white/20 text-sm">
@@ -50,15 +51,15 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                     <Calendar size={16} className="text-amber shrink-0" />
                     <span>{dateObj.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   </div>
-                  {event.time && (
+                  {event.event_time && (
                     <div className="flex items-center gap-3 text-sm text-muted">
                       <Clock size={16} className="text-cyan shrink-0" />
-                      <span>{event.time}</span>
+                      <span>{event.event_time}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-3 text-sm text-muted">
                     <MapPin size={16} className="text-pink shrink-0" />
-                    <span>{event.address}, {event.city}</span>
+                    <span>{event.venue}, {event.city}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-muted">
                     <Users size={16} className="text-green shrink-0" />

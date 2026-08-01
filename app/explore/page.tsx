@@ -54,7 +54,7 @@ function ExploreContent() {
     const events = EVENTS.filter(e =>
       !query ||
       e.title.toLowerCase().includes(query) ||
-      e.address.toLowerCase().includes(query) ||
+      (e.venue || '').toLowerCase().includes(query) ||
       e.city.toLowerCase().includes(query)
     ).map(e => ({ ...e, type: 'event' }));
 

@@ -15,12 +15,12 @@ export default function GymsPage() {
   const [search, setSearch] = useState('');
 
   const filtered = GYMS.filter((g) => {
-    if (type !== 'all' && g.type !== type) return false;
+    if (type !== 'all' && g.gym_type !== type) return false;
     if (search && !g.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   }).sort((a, b) => {
     if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'price') return a.price - b.price;
+    if (sortBy === 'price') return a.price_min - b.price_min;
     if (sortBy === 'distance') return (a.distance || 0) - (b.distance || 0);
     return 0;
   });

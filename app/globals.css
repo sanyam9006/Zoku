@@ -30,7 +30,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--zoku-text);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -247,7 +248,7 @@ export default function HostelsPage() {
                     </div>
                     {/* Hover Card */}
                     <Link href={`/hostels/${h.id}`} className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 p-4 bg-zoku-card border border-zoku-border rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-105 pointer-events-auto">
-                      <img src={h.photos[0]} alt="" className="w-full h-28 object-cover rounded-xl mb-3 shadow-sm" />
+                      <div className="relative w-full h-28 rounded-xl overflow-hidden mb-3 shadow-sm"><Image src={h.photos[0]} alt={h.name} fill className="object-cover" /></div>
                       <p className="font-black text-sm text-zoku-text mb-1 truncate">{h.name}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-muted uppercase tracking-tighter">⭐ {h.rating}</span>

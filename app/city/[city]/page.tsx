@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import ListingCard from '@/components/ListingCard';
 import EventCard from '@/components/EventCard';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function generateStaticParams() {
   return CITIES.map((c) => ({ city: c.slug }));
@@ -30,7 +31,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
       <div className="pt-20 pb-24">
         {/* Hero */}
         <div className="relative h-80 overflow-hidden">
-          <img src={city.image} alt={city.name} className="w-full h-full object-cover" />
+          <Image src={city.image} alt={city.name} fill className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-zoku-bg via-black/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8">
             <div className="max-w-7xl mx-auto">

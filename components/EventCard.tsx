@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, MapPin, Ticket, Users } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import type { Event } from '@/lib/types';
@@ -53,7 +54,7 @@ export default function EventCard({ event }: EventCardProps) {
   const colorClass = CATEGORY_COLORS[event.category] || 'text-purple-DEFAULT bg-purple-DEFAULT/10 border-purple-DEFAULT/20';
   const icon = CATEGORY_ICONS[event.category] || '🎉';
 
-  const dateObj = new Date(event.date);
+  const dateObj = new Date(event.event_date);
   const day = dateObj.getDate();
   const month = dateObj.toLocaleString('en', { month: 'short' });
 
@@ -87,10 +88,11 @@ export default function EventCard({ event }: EventCardProps) {
         <div className="glow-card overflow-hidden cursor-pointer">
           {/* Image */}
           <div className="relative h-44 overflow-hidden">
-            <img
-              src={event.photos[0]}
+            <Image
+              src={event.photo || '/placeholder.jpg'}
               alt={event.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
@@ -127,11 +129,11 @@ export default function EventCard({ event }: EventCardProps) {
 
             <div className="flex items-center gap-1 text-xs text-muted mb-1">
               <MapPin size={11} />
-              <span className="line-clamp-1">{event.city} · {event.address.split(',')[0]}</span>
+              <span className="line-clamp-1">{event.city} · {(event.venue || '').split(',')[0]}</span>
             </div>
             <div className="flex items-center gap-1 text-xs text-muted mb-3">
               <Calendar size={11} />
-              <span>{event.time}</span>
+              <span>{event.event_time}</span>
             </div>
 
             <div className="flex items-center justify-between">

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { MapPin, Briefcase, GraduationCap, Home, Heart, Settings, Grid, Bookmark, Users, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ProfileClient({ initialProfile }: { initialProfile: any }) {
   const [profile, setProfile] = useState(initialProfile)
@@ -23,9 +24,9 @@ export default function ProfileClient({ initialProfile }: { initialProfile: any 
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="relative group">
             <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-gradient-to-br from-purple-light to-purple-DEFAULT p-1 shadow-xl">
-              <div className="w-full h-full rounded-[20px] bg-white flex items-center justify-center overflow-hidden">
+              <div className="relative w-full h-full rounded-[20px] bg-white flex items-center justify-center overflow-hidden">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                  <Image src={profile.avatar_url} alt={profile.full_name} fill className="object-cover" />
                 ) : (
                   <span className="text-4xl font-bold text-purple-DEFAULT">{profile.full_name?.[0] || 'U'}</span>
                 )}

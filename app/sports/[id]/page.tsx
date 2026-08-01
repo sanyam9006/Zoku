@@ -62,7 +62,7 @@ export default function SportsDetailPage({ params }: { params: { id: string } })
                 <Users size={16} className="text-purple-DEFAULT shrink-0" /><span>{club.members_count} members</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted">
-                <Phone size={16} className="text-amber shrink-0" /><span>{club.contact}</span>
+                <Phone size={16} className="text-amber shrink-0" /><span>{club.phone}</span>
               </div>
             </div>
 

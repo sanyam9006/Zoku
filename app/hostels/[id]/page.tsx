@@ -11,6 +11,7 @@ import {
   ChevronRight, Share2, Heart, MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HostelDetailPage() {
   const { id } = useParams();
@@ -97,10 +98,11 @@ export default function HostelDetailPage() {
           {/* Image Gallery */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-12">
             <div className="md:col-span-8 relative rounded-[2.5rem] overflow-hidden bg-zoku-card aspect-video border border-zoku-border shadow-2xl">
-              <img 
+              <Image 
                 src={hostel.photos[activePhoto]} 
                 alt={hostel.name} 
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent flex items-center justify-between">
                 <p className="text-white font-bold">View of the {activePhoto === 0 ? 'Main Entrance' : activePhoto === 1 ? 'Common Area' : 'Luxury Room'}</p>
@@ -127,12 +129,12 @@ export default function HostelDetailPage() {
                   className={`relative rounded-[2rem] overflow-hidden bg-zoku-card h-full border-2 transition-all cursor-pointer ${activePhoto === i ? 'border-purple-DEFAULT scale-[0.98]' : 'border-zoku-border'}`}
                   onClick={() => setActivePhoto(i)}
                 >
-                  <img src={photo} alt="" className="w-full h-full object-cover" />
+                  <Image src={photo} alt={`${hostel.name} photo ${i + 1}`} fill className="object-cover" />
                   <div className="absolute inset-0 bg-black/20 hover:bg-transparent transition-all" />
                 </div>
               ))}
               <div className="relative rounded-[2rem] overflow-hidden bg-zoku-card h-full border border-zoku-border group cursor-pointer">
-                <img src={hostel.photos[2] || hostel.photos[0]} alt="" className="w-full h-full object-cover opacity-50 transition-transform group-hover:scale-110" />
+                <Image src={hostel.photos[2] || hostel.photos[0]} alt={`${hostel.name} gallery`} fill className="object-cover opacity-50 transition-transform group-hover:scale-110" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-white font-black text-xl">+ {hostel.photos.length - 2} Photos</span>
                 </div>

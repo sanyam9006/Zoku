@@ -1,4 +1,4 @@
-import { createServerClient as createSupabaseServerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export const createServerClient = () => {
@@ -26,3 +26,4 @@ export const createServerClient = () => {
     }
   )
 }
+
