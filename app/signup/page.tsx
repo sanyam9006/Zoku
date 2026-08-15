@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
-import { Eye, EyeOff, Mail, Lock, User, MapPin, ArrowLeft, Loader2 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
+import { Eye, EyeOff, Mail, Lock, User, MapPin, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 
 const CITIES = ['Jaipur', 'Delhi', 'Mumbai', 'Bangalore', 'Pune', 'Hyderabad'];
 
@@ -23,6 +23,12 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
+
+    if (!isSupabaseConfigured) {
+      setError('Supabase is not configured on Vercel yet. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel Project Settings.');
+      setLoading(false);
+      return;
+    }
 
     // Validation
     if (!form.name || form.name.length < 2) {
@@ -70,6 +76,10 @@ export default function SignupPage() {
   }
 
   async function handleGoogleSignup() {
+    if (!isSupabaseConfigured) {
+      setError('Supabase is not configured on Vercel yet. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.');
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -101,6 +111,21 @@ export default function SignupPage() {
             <h1 className="text-2xl font-black text-zoku-text mb-1">Join ZOKU</h1>
             <p className="text-muted text-sm">Find your tribe in every city</p>
           </div>
+
+          {/* Missing Supabase Config Notice on Vercel */}
+          {!isSupabaseConfigured && (
+            <div className="mb-6 p-4 rounded-2xl bg-amber/15 border border-amber/30 text-amber text-xs leading-relaxed">
+              <p className="font-bold flex items-center gap-1.5 mb-1.5 text-zoku-text">
+                <AlertCircle size={15} className="text-amber" />
+                Vercel Setup Required
+              </p>
+              <p className="text-muted mb-2">To connect live Auth & Database, add these 2 variables in <strong>Vercel Settings → Environment Variables</strong>:</p>
+              <div className="p-2.5 bg-black/5 rounded-xl font-mono text-[11px] text-zoku-text space-y-1">
+                <div className="font-semibold text-purple-DEFAULT">NEXT_PUBLIC_SUPABASE_URL</div>
+                <div className="font-semibold text-purple-DEFAULT">NEXT_PUBLIC_SUPABASE_ANON_KEY</div>
+              </div>
+            </div>
+          )}
 
           {/* Success Message */}
           {successMessage && (
