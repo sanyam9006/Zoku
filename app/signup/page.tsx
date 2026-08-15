@@ -63,9 +63,9 @@ export default function SignupPage() {
 
       if (authData.user) {
         if (authData.session) {
-          router.push('/onboarding');
+          window.location.href = '/onboarding';
         } else {
-          setSuccessMessage('🎉 Account created successfully! If email confirmation is enabled on your Supabase project, check your inbox to confirm, or click Login below.');
+          setSuccessMessage('🎉 Account created successfully! Please check your inbox for confirmation email, or go to Login.');
           setLoading(false);
         }
       }
@@ -162,7 +162,7 @@ export default function SignupPage() {
             <div className="flex-1 h-px bg-zoku-border" />
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleSignup} noValidate className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-muted mb-1.5 block">Full Name</label>
               <div className="relative">

@@ -2,67 +2,72 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
-  const router = useRouter();
-
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activeRole, setActiveRole] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ email: '', password: '' });
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
     if (!isSupabaseConfigured) {
-      setError('Supabase is not configured on Vercel yet. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel Project Settings.');
-      setLoading(false);
+      setError('Supabase credentials missing. Please check your Vercel Environment Variables.');
       return;
     }
 
-    // Validation
-    if (!form.email.includes('@')) {
-      setError('Enter a valid email address');
-      setLoading(false);
+    if (!form.email || !form.email.includes('@')) {
+      setError('Please enter a valid email address.');
       return;
     }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
+    if (!form.password || form.password.length < 6) {
+      setError('Password must be at least 6 characters.');
       return;
     }
+
+    setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: form.email,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: form.email.trim(),
         password: form.password,
       });
 
       if (error) {
         if (error.message.toLowerCase().includes('email not confirmed') || (error as any).code === 'email_not_confirmed') {
-          setError('Email not confirmed yet. Please check your email inbox to verify your email, or use one of the 1-Click Demo accounts below.');
+          setError('Email not confirmed yet. Please verify your email via the confirmation link, or use the 1-Click Demo accounts below.');
+        } else if (error.message.toLowerCase().includes('invalid login credentials')) {
+          setError('Invalid email or password. Please double check or use a 1-Click Demo account.');
         } else {
           setError(error.message);
         }
         setLoading(false);
-      } else {
-        router.push('/profile');
-        router.refresh();
+      } else if (data.session) {
+        // Fetch user role to direct to correct page
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle();
+
+        const role = profile?.role || data.user.user_metadata?.role || 'user';
+        const dest = role === 'admin' ? '/admin' : role === 'owner' ? '/dashboard' : '/profile';
+        window.location.href = dest;
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to sign in. Please verify your connection.');
+      setError(err?.message || 'Failed to sign in. Please verify your internet connection.');
       setLoading(false);
     }
   }
 
   async function handleGoogleLogin() {
     if (!isSupabaseConfigured) {
-      setError('Supabase is not configured on Vercel yet. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel.');
+      setError('Supabase is not configured on Vercel yet.');
       return;
     }
     setLoading(true);
@@ -78,25 +83,29 @@ export default function LoginPage() {
     }
   }
 
-  const fillAndSubmit = async (demoEmail: string) => {
-    setForm({ email: demoEmail, password: 'Password123!' });
-    setLoading(true);
+  const fillAndSubmit = async (demoEmail: string, roleName: string, destUrl: string) => {
     setError(null);
+    setForm({ email: demoEmail, password: 'Password123!' });
+    setActiveRole(roleName);
+    setLoading(true);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: 'Password123!',
       });
+
       if (error) {
         setError(error.message);
         setLoading(false);
-      } else {
-        router.push(demoEmail.includes('admin') ? '/admin' : demoEmail.includes('owner') ? '/dashboard' : '/profile');
-        router.refresh();
+        setActiveRole(null);
+      } else if (data.session) {
+        window.location.href = destUrl;
       }
     } catch (err: any) {
       setError(err?.message || 'Sign in failed');
       setLoading(false);
+      setActiveRole(null);
     }
   };
 
@@ -146,37 +155,37 @@ export default function LoginPage() {
           )}
 
           {/* 1-Click Instant Demo Login */}
-          <div className="mb-6 p-4 rounded-2xl bg-zoku-bg border border-zoku-border shadow-sm">
+          <div className="mb-6 p-4 rounded-2xl bg-zoku-card2 border border-zoku-border shadow-sm">
             <p className="text-center text-[10px] font-black text-muted uppercase tracking-wider mb-2.5">
               ⚡ Instant 1-Click Demo Login
             </p>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => fillAndSubmit('admin@zoku.app')}
+                onClick={() => fillAndSubmit('admin@zoku.app', 'admin', '/admin')}
                 disabled={loading}
-                className="p-2.5 rounded-xl border border-amber/30 bg-amber/10 text-amber hover:bg-amber/20 transition-all text-xs font-bold flex flex-col items-center gap-1 text-center active:scale-95 disabled:opacity-50"
+                className="p-3 rounded-xl border border-amber/40 bg-amber/10 text-amber hover:bg-amber/20 hover:scale-[1.02] transition-all text-xs font-bold flex flex-col items-center gap-1.5 text-center active:scale-95 disabled:opacity-50 shadow-sm"
               >
-                <span>🛡️</span>
-                <span className="text-[10px]">Admin</span>
+                <span className="text-base">🛡️</span>
+                <span className="text-xs font-black">{activeRole === 'admin' ? 'Logging in...' : 'Admin'}</span>
               </button>
               <button
                 type="button"
-                onClick={() => fillAndSubmit('owner@zoku.app')}
+                onClick={() => fillAndSubmit('owner@zoku.app', 'owner', '/dashboard')}
                 disabled={loading}
-                className="p-2.5 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan hover:bg-cyan/20 transition-all text-xs font-bold flex flex-col items-center gap-1 text-center active:scale-95 disabled:opacity-50"
+                className="p-3 rounded-xl border border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/20 hover:scale-[1.02] transition-all text-xs font-bold flex flex-col items-center gap-1.5 text-center active:scale-95 disabled:opacity-50 shadow-sm"
               >
-                <span>🏠</span>
-                <span className="text-[10px]">Owner</span>
+                <span className="text-base">🏠</span>
+                <span className="text-xs font-black">{activeRole === 'owner' ? 'Logging in...' : 'Owner'}</span>
               </button>
               <button
                 type="button"
-                onClick={() => fillAndSubmit('demo@zoku.app')}
+                onClick={() => fillAndSubmit('demo@zoku.app', 'demo', '/profile')}
                 disabled={loading}
-                className="p-2.5 rounded-xl border border-purple-DEFAULT/30 bg-purple-DEFAULT/10 text-purple-DEFAULT hover:bg-purple-DEFAULT/20 transition-all text-xs font-bold flex flex-col items-center gap-1 text-center active:scale-95 disabled:opacity-50"
+                className="p-3 rounded-xl border border-purple-DEFAULT/40 bg-purple-DEFAULT/10 text-purple-DEFAULT hover:bg-purple-DEFAULT/20 hover:scale-[1.02] transition-all text-xs font-bold flex flex-col items-center gap-1.5 text-center active:scale-95 disabled:opacity-50 shadow-sm"
               >
-                <span>👤</span>
-                <span className="text-[10px]">User</span>
+                <span className="text-base">👤</span>
+                <span className="text-xs font-black">{activeRole === 'demo' ? 'Logging in...' : 'User'}</span>
               </button>
             </div>
           </div>
@@ -198,60 +207,52 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-zoku-border" />
-            <span className="text-xs text-muted">or login with credentials</span>
+            <span className="text-xs text-muted font-medium">or login with credentials</span>
             <div className="flex-1 h-px bg-zoku-border" />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} noValidate className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-muted mb-1.5 block">Email Address</label>
+              <label className="text-xs font-bold text-zoku-text mb-1.5 block">Email Address</label>
               <div className="relative">
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   type="email"
                   placeholder="you@example.com"
-                  className="input-dark !pl-10"
+                  className="input-dark !pl-10 text-sm font-medium"
                   value={form.email}
                   disabled={loading}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  required
                 />
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-muted mb-1.5 block">Password</label>
+              <label className="text-xs font-bold text-zoku-text mb-1.5 block">Password</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                 <input
                   type={showPass ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="input-dark !pl-10 !pr-10"
+                  className="input-dark !pl-10 !pr-10 text-sm font-medium"
                   value={form.password}
                   disabled={loading}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-zoku-text"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-zoku-text p-1"
                 >
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            <div className="text-right">
-              <Link href="#" className="text-xs text-purple-DEFAULT hover:text-purple-light transition-colors">
-                Forgot password?
-              </Link>
-            </div>
-
             <button 
               type="submit" 
               disabled={loading}
-              className="btn-primary w-full !py-3 !rounded-xl !text-base flex items-center justify-center gap-2"
+              className="btn-primary w-full !py-3.5 !rounded-xl !text-base font-bold flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : 'Sign In →'}
             </button>
@@ -259,7 +260,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-muted mt-6">
             New to ZOKU?{' '}
-            <Link href="/signup" className="text-purple-DEFAULT font-semibold hover:text-purple-light transition-colors">
+            <Link href="/signup" className="text-purple-DEFAULT font-bold hover:underline transition-colors">
               Create account
             </Link>
           </p>
