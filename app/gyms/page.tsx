@@ -6,7 +6,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GymCard from '@/components/GymCard';
 import { GYMS } from '@/lib/data';
-import { Search } from 'lucide-react';
+import MapView from '@/components/MapView';
+import { Search, Grid, Map } from 'lucide-react';
 
 const GYM_TYPES = ['all', 'gym', 'yoga', 'crossfit', 'swimming', 'mixed'];
 
@@ -14,6 +15,7 @@ export default function GymsPage() {
   const [type, setType] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
   const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const PAGE_SIZE = 12;
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState<number | null>(null);
@@ -96,15 +98,23 @@ export default function GymsPage() {
               <option value="price">Lowest Price</option>
               <option value="distance">Nearest</option>
             </select>
+            <div className="flex items-center gap-1 bg-zoku-card p-1 rounded-xl border border-zoku-border ml-auto shrink-0">
+              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-lg text-xs font-semibold ${viewMode === 'grid' ? 'bg-cyan text-white' : 'text-muted'}`}><Grid size={14} /></button>
+              <button onClick={() => setViewMode('map')} className={`p-1.5 rounded-lg text-xs font-semibold ${viewMode === 'map' ? 'bg-cyan text-white' : 'text-muted'}`}><Map size={14} /></button>
+            </div>
           </div>
         </div>
 
         {/* Results */}
         <div className="max-w-7xl mx-auto px-4 py-8">
           <p className="text-sm text-muted mb-6"><span className="text-zoku-text font-semibold">{filtered.length}</span> gyms found</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map((g) => <GymCard key={g.id} gym={g} />)}
-          </div>
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filtered.map((g) => <GymCard key={g.id} gym={g} />)}
+            </div>
+          ) : (
+            <MapView items={filtered} category="gym" />
+          )}
         </div>
       </div>
       <Footer />

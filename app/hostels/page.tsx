@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ListingCard from '@/components/ListingCard';
 import EmptyState from '@/components/EmptyState';
+import MapView from '@/components/MapView';
 import { HOSTELS, CITIES } from '@/lib/data';
 import { Search, MapPin, X, RotateCcw, GraduationCap, Briefcase } from 'lucide-react';
 
@@ -248,51 +249,7 @@ export default function HostelsPage() {
               />
             )
           ) : (
-            /* Map View Mock */
-            <div className="relative w-full aspect-[21/10] min-h-[500px] bg-zoku-card border border-zoku-border rounded-[3rem] overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=1200')] bg-cover bg-center grayscale opacity-40" />
-              <div className="absolute inset-0 bg-zoku-bg/40 backdrop-blur-[1px]" />
-              
-              {/* Pins */}
-              {filtered.map((h, i) => (
-                <div 
-                  key={h.id}
-                  className="absolute animate-in zoom-in fade-in duration-700"
-                  style={{ 
-                    top: `${20 + (i * 18) % 60}%`, 
-                    left: `${15 + (i * 22) % 70}%` 
-                  }}
-                >
-                  <div className="relative group">
-                    <div className="bg-purple-DEFAULT text-white px-3 py-1.5 rounded-full font-black text-xs shadow-neon-purple hover:scale-110 transition-all cursor-pointer">
-                      ₹{h.price_min.toLocaleString()}
-                    </div>
-                    {/* Hover Card */}
-                    <Link href={`/hostels/${h.id}`} className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 p-4 bg-zoku-card border border-zoku-border rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all z-20 hover:scale-105 pointer-events-auto">
-                      <div className="relative w-full h-28 rounded-xl overflow-hidden mb-3 shadow-sm"><Image src={h.photos[0]} alt={h.name} fill className="object-cover" /></div>
-                      <p className="font-black text-sm text-zoku-text mb-1 truncate">{h.name}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-muted uppercase tracking-tighter">⭐ {h.rating}</span>
-                        <span className="text-xs font-black text-purple-DEFAULT uppercase">View Detail</span>
-                      </div>
-                    </Link>
-                    <div className="w-0.5 h-3 bg-purple-DEFAULT mx-auto shadow-neon-purple opacity-50" />
-                  </div>
-                </div>
-              ))}
-
-              <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                <div className="bg-zoku-card/80 backdrop-blur-md border border-zoku-border rounded-2xl px-6 py-3 shadow-xl flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-green shadow-neon-green animate-pulse" />
-                  <p className="text-sm font-black text-zoku-text uppercase tracking-widest">
-                    Showing {filtered.length} locations
-                  </p>
-                </div>
-                <button className="btn-secondary !bg-zoku-card/80 !backdrop-blur-md !py-3 !px-6 !rounded-2xl !text-xs !font-black !uppercase !tracking-widest">
-                  Reset View
-                </button>
-              </div>
-            </div>
+            <MapView items={filtered} category="hostel" />
           )}
         </div>
       </main>
