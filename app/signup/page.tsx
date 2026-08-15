@@ -16,7 +16,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', email: '', password: '', city: '', role: 'user' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', city: 'Bangalore', role: 'user' });
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -105,7 +105,10 @@ export default function SignupPage() {
 
         <div className="glow-card p-8">
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan to-purple-DEFAULT flex items-center justify-center text-white font-black text-2xl shadow-neon-cyan mx-auto mb-4">
+            <div 
+              style={{ background: 'linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%)' }}
+              className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-cyan/30 mx-auto mb-4"
+            >
               族
             </div>
             <h1 className="text-2xl font-black text-zoku-text mb-1">Join ZOKU</h1>

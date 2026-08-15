@@ -125,7 +125,10 @@ export default function LoginPage() {
         <div className="glow-card p-8">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-DEFAULT to-pink flex items-center justify-center text-white font-black text-2xl shadow-neon-purple mx-auto mb-4">
+            <div 
+              style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)' }}
+              className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-purple-DEFAULT/30 mx-auto mb-4"
+            >
               族
             </div>
             <h1 className="text-2xl font-black text-zoku-text mb-1">Welcome Back</h1>
