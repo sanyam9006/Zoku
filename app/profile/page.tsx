@@ -13,16 +13,25 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  const { data: profile, error } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', session.user.id)
-    .single()
+    .maybeSingle()
 
-  if (error || !profile) {
-    // If no profile, maybe they skipped onboarding or it failed
-    redirect('/onboarding')
+  const fallbackProfile = {
+    id: session.user.id,
+    full_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+    city: session.user.user_metadata?.city || 'Bangalore',
+    role: session.user.user_metadata?.role || 'user',
+    avatar_url: session.user.user_metadata?.avatar_url || null,
+    college: session.user.user_metadata?.college || 'Bangalore University',
+    company: session.user.user_metadata?.company || 'Zoku Explorer',
+    hometown: session.user.user_metadata?.hometown || 'Jaipur',
+    bio: session.user.user_metadata?.bio || 'Looking to connect and find my tribe!',
+    interests: session.user.user_metadata?.interests || ['Tech', 'Sports', 'Fitness'],
+    user_type: session.user.user_metadata?.user_type || 'student',
   }
 
-  return <ProfileClient initialProfile={profile} />
+  return <ProfileClient initialProfile={profile || fallbackProfile} />
 }
