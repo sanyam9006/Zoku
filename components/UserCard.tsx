@@ -66,14 +66,14 @@ export default function UserCard({ user, compact = false }: UserCardProps) {
       <div className="glow-card p-5 cursor-pointer group">
         {/* Avatar + Name */}
         <div className="flex items-start gap-3 mb-4">
-          <div className="relative shrink-0">
+          <div className="relative shrink-0 w-12 h-12 rounded-2xl overflow-hidden">
             <Image
-              src={user.avatar}
+              src={user.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
               alt={user.name}
               fill
-              className="rounded-2xl object-cover"
+              className="object-cover"
             />
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green rounded-full border-2 border-zoku-card" />
+            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green rounded-full border-2 border-zoku-card z-10" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-zoku-text text-sm mb-0.5 group-hover:text-green transition-colors">{user.name}</h3>

@@ -17,20 +17,52 @@ const FEED_POSTS = [
 
 const INTERESTS = ['All', 'Football', 'Yoga', 'Tech', 'Music', 'Travel', 'Chess', 'Running', 'Cooking'];
 
+import { useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
+
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState<'discover' | 'feed'>('discover');
   const [interest, setInterest] = useState('All');
   const [search, setSearch] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
+  const [usersList, setUsersList] = useState<any[]>(COMMUNITY_USERS);
+
+  useEffect(() => {
+    async function fetchProfiles() {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (!error && data && data.length > 0) {
+        const mapped = data.map((p) => ({
+          id: p.id,
+          name: p.full_name || 'Anonymous User',
+          city: p.city || 'Bangalore',
+          hometown: p.hometown || '',
+          college: p.college || '',
+          company: p.company || '',
+          bio: p.bio || '',
+          avatar: p.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+          interests: Array.isArray(p.interests) ? p.interests : ['Tech', 'Networking'],
+        }));
+        setUsersList(mapped);
+      }
+    }
+    fetchProfiles();
+  }, []);
 
   const filtered = useMemo(() => {
-    return COMMUNITY_USERS.filter((u) => {
+    return usersList.filter((u) => {
       if (selectedCity !== 'all' && u.city !== selectedCity) return false;
-      if (interest !== 'All' && !u.interests.some((i) => i.toLowerCase().includes(interest.toLowerCase()))) return false;
-      if (search && !u.name.toLowerCase().includes(search.toLowerCase()) && !u.bio?.toLowerCase().includes(search.toLowerCase())) return false;
+      if (interest !== 'All' && !u.interests.some((i: string) => i.toLowerCase().includes(interest.toLowerCase()))) return false;
+      if (
+        search &&
+        !u.name.toLowerCase().includes(search.toLowerCase()) &&
+        !u.bio?.toLowerCase().includes(search.toLowerCase()) &&
+        !u.college?.toLowerCase().includes(search.toLowerCase()) &&
+        !u.company?.toLowerCase().includes(search.toLowerCase()) &&
+        !u.hometown?.toLowerCase().includes(search.toLowerCase())
+      ) return false;
       return true;
     });
-  }, [interest, search, selectedCity]);
+  }, [usersList, interest, search, selectedCity]);
 
   const clearFilters = () => {
     setInterest('All');
