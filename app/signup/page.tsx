@@ -15,12 +15,14 @@ export default function SignupPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', password: '', city: '', role: 'user' });
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     // Validation
     if (!form.name || form.name.length < 2) {
@@ -34,26 +36,36 @@ export default function SignupPage() {
       return;
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: {
-          full_name: form.name,
-          city: form.city,
-          role: form.role,
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            full_name: form.name,
+            city: form.city,
+            role: form.role,
+          },
         },
-      },
-    });
+      });
 
-    if (authError) {
-      setError(authError.message);
+      if (authError) {
+        setError(authError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (authData.user) {
+        if (authData.session) {
+          router.push('/onboarding');
+        } else {
+          setSuccessMessage('🎉 Account created successfully! If email confirmation is enabled on your Supabase project, check your inbox to confirm, or click Login below.');
+          setLoading(false);
+        }
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to sign up. Please verify your internet connection.');
       setLoading(false);
-      return;
-    }
-
-    if (authData.user) {
-      router.push('/onboarding');
     }
   }
 
@@ -89,6 +101,13 @@ export default function SignupPage() {
             <h1 className="text-2xl font-black text-zoku-text mb-1">Join ZOKU</h1>
             <p className="text-muted text-sm">Find your tribe in every city</p>
           </div>
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className="mb-6 p-4 rounded-xl bg-green/10 border border-green/20 text-green text-xs font-semibold">
+              {successMessage}
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (

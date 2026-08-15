@@ -18,10 +18,15 @@ const FOOTER_LINKS = {
     { label: 'Bangalore', href: '/city/bangalore' },
     { label: 'Pune', href: '/city/pune' },
   ],
+  'Portals': [
+    { label: 'Owner Dashboard', href: '/dashboard' },
+    { label: 'Admin Panel', href: '/admin' },
+    { label: 'Messages & Inbox', href: '/inbox' },
+    { label: 'User Profile', href: '/profile' },
+  ],
   'Company': [
     { label: 'About Us', href: '/about' },
     { label: 'List Your Property', href: '/dashboard' },
-    { label: 'Blog', href: '/blog' },
     { label: 'Careers', href: '/careers' },
     { label: 'Contact', href: '/contact' },
   ],

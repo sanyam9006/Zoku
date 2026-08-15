@@ -31,16 +31,22 @@ export default function LoginPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push('/profile');
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to sign in. Please verify your connection.');
       setLoading(false);
-    } else {
-      router.push('/profile');
     }
   }
 

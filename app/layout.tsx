@@ -44,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="bg-zoku-bg text-white antialiased min-h-screen font-sans">
+      <body className="bg-zoku-bg text-zoku-text antialiased min-h-screen font-sans">
         <CityProvider>
           {children}
         </CityProvider>
