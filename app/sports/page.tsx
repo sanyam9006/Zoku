@@ -15,17 +15,27 @@ export default function SportsPage() {
   const [sport, setSport] = useState('All');
   const [skill, setSkill] = useState('all');
   const [search, setSearch] = useState('');
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [clubsList, setClubsList] = useState<any[]>(SPORTS_CLUBS);
 
   useEffect(() => {
     async function fetchSportsClubs() {
-      const { data, error } = await supabase.from('sports_clubs').select('*');
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, count, error } = await supabase
+        .from('sports_clubs')
+        .select('*', { count: 'exact' })
+        .range(from, to);
+
       if (!error && data && data.length > 0) {
         setClubsList(data);
+        if (count !== null) setTotalCount(count);
       }
     }
     fetchSportsClubs();
-  }, []);
+  }, [page]);
 
   const filtered = clubsList.filter((c) => {
     if (sport !== 'All' && c.sport !== sport) return false;

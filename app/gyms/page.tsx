@@ -14,17 +14,27 @@ export default function GymsPage() {
   const [type, setType] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
   const [search, setSearch] = useState('');
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [gymsList, setGymsList] = useState<any[]>(GYMS);
 
   useEffect(() => {
     async function fetchGyms() {
-      const { data, error } = await supabase.from('gyms').select('*');
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, count, error } = await supabase
+        .from('gyms')
+        .select('*', { count: 'exact' })
+        .range(from, to);
+
       if (!error && data && data.length > 0) {
         setGymsList(data);
+        if (count !== null) setTotalCount(count);
       }
     }
     fetchGyms();
-  }, []);
+  }, [page]);
 
   const filtered = gymsList.filter((g) => {
     if (type !== 'all' && g.gym_type !== type) return false;

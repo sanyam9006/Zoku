@@ -28,17 +28,27 @@ export default function HostelsPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [hostelsList, setHostelsList] = useState<any[]>(HOSTELS);
 
   useEffect(() => {
     async function fetchHostels() {
-      const { data, error } = await supabase.from('hostels').select('*');
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, count, error } = await supabase
+        .from('hostels')
+        .select('*', { count: 'exact' })
+        .range(from, to);
+
       if (!error && data && data.length > 0) {
         setHostelsList(data);
+        if (count !== null) setTotalCount(count);
       }
     }
     fetchHostels();
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     async function getProfile() {

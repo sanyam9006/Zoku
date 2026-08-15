@@ -17,17 +17,27 @@ export default function EventsPage() {
   const [freeOnly, setFreeOnly] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
+  const PAGE_SIZE = 12;
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
   const [eventsList, setEventsList] = useState<any[]>(EVENTS);
 
   useEffect(() => {
     async function fetchEvents() {
-      const { data, error } = await supabase.from('events').select('*');
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, count, error } = await supabase
+        .from('events')
+        .select('*', { count: 'exact' })
+        .range(from, to);
+
       if (!error && data && data.length > 0) {
         setEventsList(data);
+        if (count !== null) setTotalCount(count);
       }
     }
     fetchEvents();
-  }, []);
+  }, [page]);
 
   const filtered = useMemo(() => {
     return eventsList.filter((e) => {
