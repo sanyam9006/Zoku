@@ -44,7 +44,11 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setError(error.message);
+        if (error.message.toLowerCase().includes('email not confirmed') || (error as any).code === 'email_not_confirmed') {
+          setError('Email not confirmed yet. Please check your email inbox to verify your email, or use one of the 1-Click Demo accounts below.');
+        } else {
+          setError(error.message);
+        }
         setLoading(false);
       } else {
         router.push('/profile');
@@ -73,6 +77,28 @@ export default function LoginPage() {
       setLoading(false);
     }
   }
+
+  const fillAndSubmit = async (demoEmail: string) => {
+    setForm({ email: demoEmail, password: 'Password123!' });
+    setLoading(true);
+    setError(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: 'Password123!',
+      });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push(demoEmail.includes('admin') ? '/admin' : demoEmail.includes('owner') ? '/dashboard' : '/profile');
+        router.refresh();
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Sign in failed');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen animated-bg flex items-center justify-center px-4 py-12">
@@ -119,6 +145,42 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* 1-Click Instant Demo Login */}
+          <div className="mb-6 p-4 rounded-2xl bg-zoku-bg border border-zoku-border shadow-sm">
+            <p className="text-center text-[10px] font-black text-muted uppercase tracking-wider mb-2.5">
+              ⚡ Instant 1-Click Demo Login
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => fillAndSubmit('admin@zoku.app')}
+                disabled={loading}
+                className="p-2.5 rounded-xl border border-amber/30 bg-amber/10 text-amber hover:bg-amber/20 transition-all text-xs font-bold flex flex-col items-center gap-1 text-center active:scale-95 disabled:opacity-50"
+              >
+                <span>🛡️</span>
+                <span className="text-[10px]">Admin</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => fillAndSubmit('owner@zoku.app')}
+                disabled={loading}
+                className="p-2.5 rounded-xl border border-cyan/30 bg-cyan/10 text-cyan hover:bg-cyan/20 transition-all text-xs font-bold flex flex-col items-center gap-1 text-center active:scale-95 disabled:opacity-50"
+              >
+                <span>🏠</span>
+                <span className="text-[10px]">Owner</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => fillAndSubmit('demo@zoku.app')}
+                disabled={loading}
+                className="p-2.5 rounded-xl border border-purple-DEFAULT/30 bg-purple-DEFAULT/10 text-purple-DEFAULT hover:bg-purple-DEFAULT/20 transition-all text-xs font-bold flex flex-col items-center gap-1 text-center active:scale-95 disabled:opacity-50"
+              >
+                <span>👤</span>
+                <span className="text-[10px]">User</span>
+              </button>
+            </div>
+          </div>
+
           {/* Google OAuth */}
           <button 
             onClick={handleGoogleLogin}
@@ -136,7 +198,7 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-zoku-border" />
-            <span className="text-xs text-muted">or</span>
+            <span className="text-xs text-muted">or login with credentials</span>
             <div className="flex-1 h-px bg-zoku-border" />
           </div>
 
