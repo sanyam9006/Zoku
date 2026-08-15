@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "npx tsx supabase/seed.ts"
+    "seed": "npx tsx supabase/seed.ts",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
