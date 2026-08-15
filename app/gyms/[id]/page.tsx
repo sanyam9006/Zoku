@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { GYMS } from '@/lib/data';
@@ -5,18 +8,28 @@ import { notFound } from 'next/navigation';
 import { Star, MapPin, Clock, Shield, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-
-export function generateStaticParams() {
-  return GYMS.map((g) => ({ id: g.id }));
-}
+import { supabase } from '@/lib/supabase/client';
+import type { Gym } from '@/lib/types';
 
 const TYPE_ICONS: Record<string, string> = {
   gym: '💪', yoga: '🧘', crossfit: '🔥', swimming: '🏊', mixed: '⚡',
 };
 
 export default function GymDetailPage({ params }: { params: { id: string } }) {
-  const gym = GYMS.find((g) => g.id === params.id);
-  if (!gym) return notFound();
+  const [gym, setGym] = useState<Gym | null>(() => GYMS.find((g) => g.id === params.id) || null);
+
+  useEffect(() => {
+    async function fetchGym() {
+      if (!params.id) return;
+      const { data, error } = await supabase.from('gyms').select('*').eq('id', params.id).single();
+      if (!error && data) {
+        setGym(data as Gym);
+      }
+    }
+    fetchGym();
+  }, [params.id]);
+
+  if (!gym) return null;
 
   return (
     <div className="min-h-screen flex flex-col">

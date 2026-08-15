@@ -28,19 +28,30 @@ export default function HostelsPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
+  const [hostelsList, setHostelsList] = useState<any[]>(HOSTELS);
+
+  useEffect(() => {
+    async function fetchHostels() {
+      const { data, error } = await supabase.from('hostels').select('*');
+      if (!error && data && data.length > 0) {
+        setHostelsList(data);
+      }
+    }
+    fetchHostels();
+  }, []);
+
   useEffect(() => {
     async function getProfile() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserProfile(user.user_metadata);
-        // Also fetch from profiles table if needed, for simplicity using metadata
       }
     }
     getProfile();
   }, []);
 
   const filtered = useMemo(() => {
-    return HOSTELS.filter((h) => {
+    return hostelsList.filter((h) => {
       if (selectedCity !== 'all' && h.city !== selectedCity) return false;
       if (gender !== 'all' && h.gender !== gender) return false;
       if (search && !h.name.toLowerCase().includes(search.toLowerCase()) && !h.address.toLowerCase().includes(search.toLowerCase())) return false;
@@ -50,12 +61,12 @@ export default function HostelsPage() {
       }
       return true;
     }).sort((a, b) => {
-      if (sortBy === 'rating') return b.rating - a.rating;
-      if (sortBy === 'price') return a.price_min - b.price_min;
+      if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+      if (sortBy === 'price') return (a.price_min || 0) - (b.price_min || 0);
       if (sortBy === 'distance') return (a.distance || 0) - (b.distance || 0);
       return 0;
     });
-  }, [gender, priceRange, search, sortBy, selectedCity]);
+  }, [hostelsList, gender, priceRange, search, sortBy, selectedCity]);
 
   const clearFilters = () => {
     setGender('all');

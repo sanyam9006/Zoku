@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -11,14 +11,15 @@ import ClubCard from '@/components/ClubCard';
 import UserCard from '@/components/UserCard';
 import { HOSTELS, GYMS, EVENTS, SPORTS_CLUBS, COMMUNITY_USERS } from '@/lib/data';
 import { Search, X } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
 
-const CATEGORIES = [
+const CATEGORIES: { id: string; label: string; icon: string; count?: number }[] = [
   { id: 'all', label: 'All', icon: '✨' },
-  { id: 'hostels', label: 'Hostels', icon: '🏠', count: HOSTELS.length },
-  { id: 'gyms', label: 'Gyms', icon: '💪', count: GYMS.length },
-  { id: 'sports', label: 'Sports', icon: '⚽', count: SPORTS_CLUBS.length },
-  { id: 'events', label: 'Events', icon: '🎉', count: EVENTS.length },
-  { id: 'community', label: 'Community', icon: '👥', count: COMMUNITY_USERS.length },
+  { id: 'hostels', label: 'Hostels', icon: '🏠' },
+  { id: 'gyms', label: 'Gyms', icon: '💪' },
+  { id: 'sports', label: 'Sports', icon: '⚽' },
+  { id: 'events', label: 'Events', icon: '🎉' },
+  { id: 'community', label: 'Community', icon: '👥' },
 ];
 
 function ExploreContent() {
@@ -27,34 +28,55 @@ function ExploreContent() {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
+  const [hostelsList, setHostelsList] = useState<any[]>(HOSTELS);
+  const [gymsList, setGymsList] = useState<any[]>(GYMS);
+  const [sportsList, setSportsList] = useState<any[]>(SPORTS_CLUBS);
+  const [eventsList, setEventsList] = useState<any[]>(EVENTS);
+
+  useEffect(() => {
+    async function fetchAll() {
+      const [hRes, gRes, sRes, eRes] = await Promise.all([
+        supabase.from('hostels').select('*'),
+        supabase.from('gyms').select('*'),
+        supabase.from('sports_clubs').select('*'),
+        supabase.from('events').select('*'),
+      ]);
+      if (hRes.data && hRes.data.length > 0) setHostelsList(hRes.data);
+      if (gRes.data && gRes.data.length > 0) setGymsList(gRes.data);
+      if (sRes.data && sRes.data.length > 0) setSportsList(sRes.data);
+      if (eRes.data && eRes.data.length > 0) setEventsList(eRes.data);
+    }
+    fetchAll();
+  }, []);
+
   const filteredResults = useMemo(() => {
     const query = searchQuery.toLowerCase();
 
-    const hostels = HOSTELS.filter(h =>
+    const hostels = hostelsList.filter(h =>
       !query ||
       h.name.toLowerCase().includes(query) ||
-      h.address.toLowerCase().includes(query) ||
+      (h.address || '').toLowerCase().includes(query) ||
       h.city.toLowerCase().includes(query)
     ).map(h => ({ ...h, type: 'hostel' }));
 
-    const gyms = GYMS.filter(g =>
+    const gyms = gymsList.filter(g =>
       !query ||
       g.name.toLowerCase().includes(query) ||
-      g.address.toLowerCase().includes(query) ||
+      (g.address || '').toLowerCase().includes(query) ||
       g.city.toLowerCase().includes(query)
     ).map(g => ({ ...g, type: 'gym' }));
 
-    const sports = SPORTS_CLUBS.filter(s =>
+    const sports = sportsList.filter(s =>
       !query ||
       s.name.toLowerCase().includes(query) ||
-      s.address.toLowerCase().includes(query) ||
+      (s.address || '').toLowerCase().includes(query) ||
       s.city.toLowerCase().includes(query)
     ).map(s => ({ ...s, type: 'sports' }));
 
-    const events = EVENTS.filter(e =>
+    const events = eventsList.filter(e =>
       !query ||
       e.title.toLowerCase().includes(query) ||
-      (e.venue || '').toLowerCase().includes(query) ||
+      (e.venue || e.address || '').toLowerCase().includes(query) ||
       e.city.toLowerCase().includes(query)
     ).map(e => ({ ...e, type: 'event' }));
 
@@ -73,8 +95,8 @@ function ExploreContent() {
     if (activeTab === 'sports') return sports;
     if (activeTab === 'events') return events;
     if (activeTab === 'community') return community;
-    return [];
-  }, [activeTab, searchQuery]);
+    return allResults;
+  }, [activeTab, searchQuery, hostelsList, gymsList, sportsList, eventsList]);
 
   return (
     <div className="min-h-screen flex flex-col bg-zoku-bg">

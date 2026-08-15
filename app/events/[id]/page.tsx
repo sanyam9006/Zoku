@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { EVENTS } from '@/lib/data';
@@ -5,10 +8,8 @@ import { notFound } from 'next/navigation';
 import { Calendar, MapPin, Users, Ticket, ArrowLeft, Clock } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-
-export function generateStaticParams() {
-  return EVENTS.map((e) => ({ id: e.id }));
-}
+import { supabase } from '@/lib/supabase/client';
+import type { Event } from '@/lib/types';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   music: '🎵', sports: '⚽', tech: '💻', culture: '🎭',
@@ -16,8 +17,20 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 };
 
 export default function EventDetailPage({ params }: { params: { id: string } }) {
-  const event = EVENTS.find((e) => e.id === params.id);
-  if (!event) return notFound();
+  const [event, setEvent] = useState<Event | null>(() => EVENTS.find((e) => e.id === params.id) || null);
+
+  useEffect(() => {
+    async function fetchEvent() {
+      if (!params.id) return;
+      const { data, error } = await supabase.from('events').select('*').eq('id', params.id).single();
+      if (!error && data) {
+        setEvent(data as Event);
+      }
+    }
+    fetchEvent();
+  }, [params.id]);
+
+  if (!event) return null;
 
   const emoji = CATEGORY_EMOJIS[event.category] || '🎉';
   const dateObj = new Date(event.event_date);

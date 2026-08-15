@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GymCard from '@/components/GymCard';
@@ -13,14 +14,25 @@ export default function GymsPage() {
   const [type, setType] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
   const [search, setSearch] = useState('');
+  const [gymsList, setGymsList] = useState<any[]>(GYMS);
 
-  const filtered = GYMS.filter((g) => {
+  useEffect(() => {
+    async function fetchGyms() {
+      const { data, error } = await supabase.from('gyms').select('*');
+      if (!error && data && data.length > 0) {
+        setGymsList(data);
+      }
+    }
+    fetchGyms();
+  }, []);
+
+  const filtered = gymsList.filter((g) => {
     if (type !== 'all' && g.gym_type !== type) return false;
     if (search && !g.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   }).sort((a, b) => {
-    if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'price') return a.price_min - b.price_min;
+    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+    if (sortBy === 'price') return (a.price_min || 0) - (b.price_min || 0);
     if (sortBy === 'distance') return (a.distance || 0) - (b.distance || 0);
     return 0;
   });

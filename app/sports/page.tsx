@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ClubCard from '@/components/ClubCard';
@@ -14,8 +15,19 @@ export default function SportsPage() {
   const [sport, setSport] = useState('All');
   const [skill, setSkill] = useState('all');
   const [search, setSearch] = useState('');
+  const [clubsList, setClubsList] = useState<any[]>(SPORTS_CLUBS);
 
-  const filtered = SPORTS_CLUBS.filter((c) => {
+  useEffect(() => {
+    async function fetchSportsClubs() {
+      const { data, error } = await supabase.from('sports_clubs').select('*');
+      if (!error && data && data.length > 0) {
+        setClubsList(data);
+      }
+    }
+    fetchSportsClubs();
+  }, []);
+
+  const filtered = clubsList.filter((c) => {
     if (sport !== 'All' && c.sport !== sport) return false;
     if (skill !== 'all' && c.skill_level !== skill) return false;
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;

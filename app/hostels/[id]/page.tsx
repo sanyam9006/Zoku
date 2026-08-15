@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,10 +13,24 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 
+import { supabase } from '@/lib/supabase/client';
+import type { Hostel } from '@/lib/types';
+
 export default function HostelDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const hostel = HOSTELS.find((h) => h.id === id);
+  const [hostel, setHostel] = useState<Hostel | null>(() => HOSTELS.find((h) => h.id === id) || null);
+
+  useEffect(() => {
+    async function fetchHostel() {
+      if (!id) return;
+      const { data, error } = await supabase.from('hostels').select('*').eq('id', id).single();
+      if (!error && data) {
+        setHostel(data as Hostel);
+      }
+    }
+    fetchHostel();
+  }, [id]);
 
   const [activePhoto, setActivePhoto] = useState(0);
   const [isLiked, setIsLiked] = useState(false);

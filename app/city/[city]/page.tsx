@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { CITIES, HOSTELS, GYMS, EVENTS, SPORTS_CLUBS } from '@/lib/data';
@@ -6,22 +9,42 @@ import ListingCard from '@/components/ListingCard';
 import EventCard from '@/components/EventCard';
 import Link from 'next/link';
 import Image from 'next/image';
-
-export function generateStaticParams() {
-  return CITIES.map((c) => ({ city: c.slug }));
-}
+import { supabase } from '@/lib/supabase/client';
 
 export default function CityPage({ params }: { params: { city: string } }) {
   const city = CITIES.find((c) => c.slug === params.city);
-  if (!city) return notFound();
 
-  const cityHostels = HOSTELS.filter((h) => h.city.toLowerCase() === city.name.toLowerCase()).slice(0, 3);
-  const cityEvents = EVENTS.filter((e) => e.city.toLowerCase() === city.name.toLowerCase()).slice(0, 3);
+  const [hostels, setHostels] = useState<any[]>(() => HOSTELS.filter((h) => h.city.toLowerCase() === city?.name.toLowerCase()));
+  const [events, setEvents] = useState<any[]>(() => EVENTS.filter((e) => e.city.toLowerCase() === city?.name.toLowerCase()));
+  const [gymsCount, setGymsCount] = useState<number>(() => GYMS.filter((g) => g.city.toLowerCase() === city?.name.toLowerCase()).length);
+  const [sportsCount, setSportsCount] = useState<number>(() => SPORTS_CLUBS.filter((s) => s.city.toLowerCase() === city?.name.toLowerCase()).length);
+
+  useEffect(() => {
+    async function fetchCityData() {
+      if (!city) return;
+      const [hRes, eRes, gRes, sRes] = await Promise.all([
+        supabase.from('hostels').select('*').ilike('city', city.name),
+        supabase.from('events').select('*').ilike('city', city.name),
+        supabase.from('gyms').select('id', { count: 'exact', head: true }).ilike('city', city.name),
+        supabase.from('sports_clubs').select('id', { count: 'exact', head: true }).ilike('city', city.name),
+      ]);
+      if (hRes.data && hRes.data.length > 0) setHostels(hRes.data);
+      if (eRes.data && eRes.data.length > 0) setEvents(eRes.data);
+      if (gRes.count !== null && gRes.count > 0) setGymsCount(gRes.count);
+      if (sRes.count !== null && sRes.count > 0) setSportsCount(sRes.count);
+    }
+    fetchCityData();
+  }, [city]);
+
+  if (!city) return null;
+
+  const cityHostels = hostels.slice(0, 3);
+  const cityEvents = events.slice(0, 3);
 
   const cityStats = [
-    { label: 'Hostels & PGs', val: cityHostels.length || '20+', color: 'text-purple-DEFAULT' },
-    { label: 'Gyms', val: GYMS.filter((g) => g.city.toLowerCase() === city.name.toLowerCase()).length || '15+', color: 'text-cyan' },
-    { label: 'Sports Clubs', val: SPORTS_CLUBS.filter((s) => s.city.toLowerCase() === city.name.toLowerCase()).length || '10+', color: 'text-green' },
+    { label: 'Hostels & PGs', val: hostels.length || '20+', color: 'text-purple-DEFAULT' },
+    { label: 'Gyms', val: gymsCount || '15+', color: 'text-cyan' },
+    { label: 'Sports Clubs', val: sportsCount || '10+', color: 'text-green' },
     { label: 'Events/Month', val: '50+', color: 'text-amber' },
   ];
 

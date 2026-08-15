@@ -1,13 +1,14 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { SPORTS_CLUBS } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { MapPin, Calendar, Users, Phone, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-
-export function generateStaticParams() {
-  return SPORTS_CLUBS.map((c) => ({ id: c.id }));
-}
+import { supabase } from '@/lib/supabase/client';
+import type { SportsClub } from '@/lib/types';
 
 const SPORT_ICONS: Record<string, string> = {
   Football: '⚽', Badminton: '🏸', Cricket: '🏏', Basketball: '🏀',
@@ -15,8 +16,20 @@ const SPORT_ICONS: Record<string, string> = {
 };
 
 export default function SportsDetailPage({ params }: { params: { id: string } }) {
-  const club = SPORTS_CLUBS.find((c) => c.id === params.id);
-  if (!club) return notFound();
+  const [club, setClub] = useState<SportsClub | null>(() => SPORTS_CLUBS.find((c) => c.id === params.id) || null);
+
+  useEffect(() => {
+    async function fetchClub() {
+      if (!params.id) return;
+      const { data, error } = await supabase.from('sports_clubs').select('*').eq('id', params.id).single();
+      if (!error && data) {
+        setClub(data as SportsClub);
+      }
+    }
+    fetchClub();
+  }, [params.id]);
+
+  if (!club) return null;
 
   const icon = SPORT_ICONS[club.sport] || '🏅';
   const skillColors: Record<string, string> = {

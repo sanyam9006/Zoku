@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import EventCard from '@/components/EventCard';
@@ -16,16 +17,27 @@ export default function EventsPage() {
   const [freeOnly, setFreeOnly] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
+  const [eventsList, setEventsList] = useState<any[]>(EVENTS);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      const { data, error } = await supabase.from('events').select('*');
+      if (!error && data && data.length > 0) {
+        setEventsList(data);
+      }
+    }
+    fetchEvents();
+  }, []);
 
   const filtered = useMemo(() => {
-    return EVENTS.filter((e) => {
+    return eventsList.filter((e) => {
       if (selectedCity !== 'all' && e.city !== selectedCity) return false;
       if (category !== 'all' && e.category !== category) return false;
       if (freeOnly && !e.is_free) return false;
       if (search && !e.title.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [category, freeOnly, search, selectedCity]);
+  }, [eventsList, category, freeOnly, search, selectedCity]);
 
   const clearFilters = () => {
     setCategory('all');
