@@ -30,6 +30,29 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
     fetchEvent();
   }, [params.id]);
 
+  const [attendees, setAttendees] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchAttendees() {
+      if (!event?.id) return;
+      const { data: rsvpData } = await supabase
+        .from('rsvps')
+        .select('user_id')
+        .eq('event_id', event.id);
+
+      if (rsvpData && rsvpData.length > 0) {
+        const userIds = rsvpData.map((r) => r.user_id);
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url, city, interests, hometown')
+          .in('id', userIds);
+
+        setAttendees(profileData || []);
+      }
+    }
+    fetchAttendees();
+  }, [event?.id]);
+
   if (!event) return null;
 
   const emoji = CATEGORY_EMOJIS[event.category] || '🎉';
@@ -87,6 +110,38 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
                   <p className="text-muted text-sm leading-relaxed">{event.description}</p>
                 </div>
               )}
+
+              {/* Social Matching Section */}
+              <div className="glow-card p-5 border border-purple-DEFAULT/30">
+                <h2 className="font-bold text-zoku-text mb-2 flex items-center gap-2">
+                  <span className="text-xl">🤝</span> Find Your Tribe at This Event
+                </h2>
+                <p className="text-xs text-muted mb-4">
+                  {attendees.length > 0
+                    ? `${attendees.length} members going are also looking to build their network in ${event.city}!`
+                    : `RSVP now to connect with other students & professionals going to this event in ${event.city}!`}
+                </p>
+
+                {attendees.length > 0 ? (
+                  <div className="flex flex-wrap gap-3">
+                    {attendees.slice(0, 5).map((att) => (
+                      <div key={att.id} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
+                        <div className="w-6 h-6 rounded-full bg-purple-DEFAULT flex items-center justify-center font-bold text-white text-[10px]">
+                          {(att.full_name || 'U')[0]}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-zoku-text">{att.full_name || 'Tribe Member'}</p>
+                          {att.hometown && <p className="text-[10px] text-muted">From {att.hometown}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 p-3 bg-purple-DEFAULT/10 rounded-xl border border-purple-DEFAULT/20 text-xs text-purple-DEFAULT">
+                    <span>✨</span> RSVPing shows your profile to fellow attendees with shared interests.
+                  </div>
+                )}
+              </div>
 
               {event.organizer && (
                 <div className="glow-card p-5">
